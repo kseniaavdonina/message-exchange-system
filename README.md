@@ -72,8 +72,7 @@ cd message-exchange-system
 
 ### Шаг 2: Сборка приложения
 
-mvn clean
-mvn package
+mvn clean package
 
 ### Шаг 3: Запуск всех сервисов
 
