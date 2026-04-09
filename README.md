@@ -68,6 +68,7 @@
 ### Шаг 1: Клонирование репозитория
 
 git clone https://github.com/your-username/message-exchange-system.git
+
 cd message-exchange-system
 
 ### Шаг 2: Сборка приложения
