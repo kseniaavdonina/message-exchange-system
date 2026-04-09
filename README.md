@@ -92,12 +92,12 @@ docker-compose logs -f app-1
 
 ### Шаг 7: Тестовые учётные записи
 
-Роль	        Email	            Пароль
-Администратор	admin@company.org	admin
-Администратор	security@system.com	security
-Пользователь	user@sam.reshu	    password
-Пользователь	test1@sam.reshu	    test1
-Пользователь	test2@company.org	test2
+Роль | Email | Пароль
+Администратор	| admin@company.org |	admin
+Администратор |	security@system.com | security
+Пользователь | user@sam.reshu | password
+Пользователь | test1@sam.reshu | test1
+Пользователь |	test2@company.org | test2
 
 ### Шаг 8: Остановка всех сервисов
 
