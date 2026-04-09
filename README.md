@@ -93,6 +93,7 @@ docker-compose logs -f app-1
 ### Шаг 7: Тестовые учётные записи
 
 Роль | Email | Пароль
+|-----------|------------|------------|
 Администратор	| admin@company.org |	admin
 Администратор |	security@system.com | security
 Пользователь | user@sam.reshu | password
