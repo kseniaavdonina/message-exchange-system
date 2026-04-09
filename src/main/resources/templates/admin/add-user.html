@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить пользователя - Админ-панель РИТМ</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a73e8'><path d='M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z'/></svg>">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* ========== Базовые стили ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f6f8fc;
+            height: 100vh;
+            display: flex;
+        }
+
+         /* ========== Боковая панель ========== */
+        .sidebar {
+            width: 250px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px 0;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: #1a73e8;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        /* ========== Стили для навигации ========== */
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #5f6368;
+            padding: 12px 20px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #f1f3f4;
+        }
+
+        .nav-links li.active a {
+            background: #e8f0fe;
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        /* ========== Основной контент ========== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== Шапка ========== */
+        .header {
+            background: white;
+            padding: 16px 32px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* ========== Кнопки ========== */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0d62d9;
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+        }
+
+        /* ========== Информация о пользователе ========== */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-badge {
+            background: #1a73e8;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-badge {
+            background: #d93025;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+
+        /* ========== Уведомления ========== */
+        .notification {
+            margin: 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .notification-success {
+            background: #e6f4ea;
+            color: #137333;
+            border: 1px solid #a8dab5;
+        }
+
+        .notification-error {
+            background: #fce8e6;
+            color: #c5221f;
+            border: 1px solid #f5b4ab;
+        }
+
+        /* ========== Контент ========== */
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* ========== Контейнер формы ========== */
+        .form-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-header {
+            padding: 24px;
+            background: #1a73e8;
+            color: white;
+        }
+
+        .form-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+        }
+
+        .form-body {
+            padding: 24px;
+        }
+
+        /* ========== Элементы формы ========== */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label .required {
+            color: #ea4335;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+
+        .form-control.is-valid {
+            border-color: #0d9d58;
+        }
+
+        .form-control.is-invalid {
+            border-color: #ea4335;
+        }
+
+        .input-group {
+            display: flex;
+        }
+
+        .input-group .form-control {
+            border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-group .btn-eye {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-left: none;
+            padding: 0 16px;
+            cursor: pointer;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            color: #5f6368;
+        }
+
+        .form-text {
+            font-size: 0.75rem;
+            color: #5f6368;
+            margin-top: 4px;
+        }
+
+        .invalid-feedback {
+            color: #ea4335;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .form-check-label {
+            font-size: 0.875rem;
+            color: #333;
+        }
+
+        /* ========== Действия формы ========== */
+        .form-actions {
+            padding: 24px;
+            border-top: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* ========== Карточка с рекомендациями ========== */
+        .info-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .info-list {
+            list-style: none;
+        }
+
+        .info-list li {
+            padding: 8px 0;
+            color: #5f6368;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-list li i {
+            color: #1a73e8;
+        }
+
+        /* ========== Генератор паролей ========== */
+        .password-generator {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .password-display {
+            flex: 1;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 12px 16px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+        }
+
+        /* ========== Кнопка выхода ========== */
+        .logout-button {
+            background: none;
+            border: none;
+            color: #5f6368;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            font-family: inherit;
+            font-size: inherit;
+            transition: background 0.3s;
+        }
+
+        .logout-button:hover {
+            background: #f1f3f4;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== БОКОВАЯ ПАНЕЛЬ ========== -->
+<div class="sidebar">
+    <div class="logo">
+        <h1><i class="fas fa-shield-alt"></i> РИТМ</h1>
+        <div style="font-size: 0.875rem; color: #5f6368; margin-top: 5px;">
+            <i class="fas fa-user-shield"></i> Админ-панель
+        </div>
+    </div>
+    <ul class="nav-links">
+        <li>
+            <a href="/admin/dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Дашборд</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/users">
+                <i class="fas fa-users"></i>
+                <span>Пользователи</span>
+            </a>
+        </li>
+        <li class="active">
+            <a href="/admin/users/add">
+                <i class="fas fa-user-plus"></i>
+                <span>Добавить</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/monitoring">
+                <i class="fas fa-chart-line"></i>
+                <span>Мониторинг</span>
+            </a>
+        </li>
+        <li>
+            <a href="/dashboard">
+                <i class="fas fa-envelope"></i>
+                <span>Почта</span>
+            </a>
+        </li>
+        <li style="margin-top: 30px;">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-button">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Выйти</span>
+                </button>
+            </form>
+        </li>
+    </ul>
+</div>
+
+<!-- ========== ОСНОВНОЙ КОНТЕНТ ========== -->
+<div class="main-content">
+    <!-- ========== ШАПКА ========== -->
+    <div class="header">
+        <div>
+            <h2>Добавить пользователя</h2>
+            <div style="font-size: 0.875rem; color: #5f6368; margin-top: 4px;">
+                Создание новой учетной записи пользователя
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="/admin/users" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Назад к списку
+            </a>
+        </div>
+    </div>
+
+    <!-- ========== УВЕДОМЛЕНИЯ ========== -->
+    <div th:if="${success}" class="notification notification-success">
+        <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="notification notification-error">
+        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+    </div>
+
+    <!-- ========== КОНТЕНТ ========== -->
+    <div class="content">
+        <div class="form-container">
+            <!-- Основная форма -->
+            <div class="form-card">
+                <div class="form-header">
+                    <h3><i class="fas fa-user-plus"></i> Информация о пользователе</h3>
+                </div>
+
+                <form th:action="@{/admin/users/add}" method="post" id="userForm" class="form-body">
+                    <!-- Поле: Имя пользователя -->
+                    <div class="form-group">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user-tag"></i> Имя пользователя <span class="required">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="username"
+                               name="username"
+                               required
+                               minlength="3"
+                               maxlength="50"
+                               placeholder="Введите имя пользователя">
+                        <div class="form-text">
+                            Имя пользователя для входа в систему. Минимум 3 символа.
+                        </div>
+                    </div>
+
+                    <!-- Поле: Email -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email адрес <span class="required">*</span>
+                        </label>
+                        <input type="email"
+                               class="form-control"
+                               id="email"
+                               name="email"
+                               required
+                               placeholder="user@example.com">
+                        <div class="form-text">
+                            Email используется для входа и получения писем.
+                        </div>
+                    </div>
+
+                    <!-- Поле: Пароль -->
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-key"></i> Пароль <span class="required">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="password"
+                                   class="form-control"
+                                   id="password"
+                                   name="password"
+                                   required
+                                   minlength="12"
+                                   placeholder="Минимум 12 символов">
+                            <button type="button"
+                                    class="btn-eye"
+                                    onclick="togglePassword('password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Пароль должен содержать минимум 12 символов.
+                        </div>
+                    </div>
+
+                    <!-- Поле: Подтверждение пароля -->
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">
+                            <i class="fas fa-key"></i> Подтверждение пароля <span class="required">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="password"
+                                   class="form-control"
+                                   id="confirmPassword"
+                                   required
+                                   minlength="12"
+                                   placeholder="Повторите пароль">
+                            <button type="button"
+                                    class="btn-eye"
+                                    onclick="togglePassword('confirmPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback" id="passwordError">
+                            Пароли не совпадают
+                        </div>
+                    </div>
+
+                    <!-- Генератор пароля -->
+                    <div class="password-generator">
+                        <button type="button"
+                                class="btn btn-secondary"
+                                onclick="generatePassword()">
+                            <i class="fas fa-random"></i> Сгенерировать пароль
+                        </button>
+                        <div class="password-display" id="generatedPassword">
+                            Нажмите "Сгенерировать"
+                        </div>
+                    </div>
+
+                    <!-- Статус учётной записи -->
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="enabled"
+                                   name="enabled"
+                                   value="true"
+                                   checked>
+                            <label class="form-check-label" for="enabled">
+                                Активная учетная запись
+                            </label>
+                        </div>
+                        <div class="form-text">
+                            Если снять галочку, пользователь не сможет войти в систему.
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Кнопки действий -->
+                <div class="form-actions">
+                    <a href="/admin/users" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Отмена
+                    </a>
+                    <button type="submit"
+                            class="btn btn-primary"
+                            form="userForm">
+                        <i class="fas fa-check"></i> Создать пользователя
+                    </button>
+                </div>
+            </div>
+
+            <!-- Карточка с рекомендациями -->
+            <div class="info-card">
+                <div class="info-header">
+                    <i class="fas fa-lightbulb"></i>
+                    <h4>Рекомендации по паролям</h4>
+                </div>
+                <ul class="info-list">
+                    <li><i class="fas fa-check-circle"></i> Используйте пароли длиной не менее 12 символов</li>
+                    <li><i class="fas fa-check-circle"></i> Сочетайте буквы, цифры и специальные символы</li>
+                    <li><i class="fas fa-check-circle"></i> Избегайте использования личной информации</li>
+                    <li><i class="fas fa-check-circle"></i> Не используйте один пароль для разных учетных записей</li>
+                    <li><i class="fas fa-check-circle"></i> Рекомендуется использовать менеджер паролей</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+    /**
+     * Переключает видимость пароля (показать/скрыть).
+     * @param {string} inputId - ID поля ввода
+     */
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const button = input.nextElementSibling.querySelector('i');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            button.classList.remove('fa-eye');
+            button.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            button.classList.remove('fa-eye-slash');
+            button.classList.add('fa-eye');
+        }
+    }
+
+    /**
+     * Генерирует случайный пароль длиной 12 символов,
+     * содержащий заглавные, строчные буквы, цифры и спецсимволы.
+     */
+    function generatePassword() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        let password = '';
+
+        // Гарантируем наличие всех типов символов
+        password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(Math.floor(Math.random() * 26));
+        password += 'abcdefghijklmnopqrstuvwxyz'.charAt(Math.floor(Math.random() * 26));
+        password += '0123456789'.charAt(Math.floor(Math.random() * 10));
+        password += '!@#$%^&*'.charAt(Math.floor(Math.random() * 8));
+
+        // Заполняем остальные символы до 12
+        for (let i = 4; i < 12; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        // Перемешиваем
+        password = password.split('').sort(() => 0.5 - Math.random()).join('');
+
+        // Устанавливаем пароль в поля
+        document.getElementById('password').value = password;
+        document.getElementById('confirmPassword').value = password;
+        document.getElementById('generatedPassword').textContent = password;
+
+        // Показываем пароль (делаем поля видимыми)
+        document.getElementById('password').type = 'text';
+        document.getElementById('confirmPassword').type = 'text';
+
+        // Обновляем иконки глазков
+        document.querySelectorAll('.btn-eye i').forEach(icon => {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        });
+    }
+
+    // Валидация формы перед отправкой
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const passwordError = document.getElementById('passwordError');
+
+        // Проверка совпадения паролей
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            passwordError.style.display = 'block';
+            document.getElementById('confirmPassword').classList.add('is-invalid');
+            return false;
+        }
+
+        // Проверка минимальной длины пароля
+        if (password.length < 12) {
+            e.preventDefault();
+            alert('Пароль должен содержать минимум 12 символов');
+            return false;
+        }
+
+        return true;
+    });
+
+    // Проверка паролей в реальном времени
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        const passwordError = document.getElementById('passwordError');
+
+        if (confirmPassword.length > 0 && password !== confirmPassword) {
+            passwordError.style.display = 'block';
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (confirmPassword.length > 0) {
+            passwordError.style.display = 'none';
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            passwordError.style.display = 'none';
+            this.classList.remove('is-invalid');
+            this.classList.remove('is-valid');
+        }
+    });
+
+    // Валидация имени пользователя
+    document.getElementById('username').addEventListener('input', function() {
+        const username = this.value;
+
+        if (username.length < 3 && username.length > 0) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (username.length >= 3) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-invalid');
+            this.classList.remove('is-valid');
+        }
+    });
+
+    // Валидация email
+    document.getElementById('email').addEventListener('input', function() {
+        const email = this.value;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (email.length > 0 && !emailPattern.test(email)) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (emailPattern.test(email)) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-invalid');
+            this.classList.remove('is-valid');
+        }
+    });
+</script>
+
+</body>
+</html>

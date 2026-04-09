@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доступ запрещен - РИТМ</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a73e8'><path d='M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z'/></svg>">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* ========== Базовые стили ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f6f8fc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ========== Контейнер ошибки ========== */
+        .error-container {
+            max-width: 500px;
+            width: 100%;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .error-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 40px 30px;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            color: #ea4335;
+            margin-bottom: 20px;
+        }
+
+        .error-icon i {
+            background: #fce8e6;
+            padding: 20px;
+            border-radius: 50%;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            color: #ea4335;
+            margin-bottom: 16px;
+        }
+
+        .error-message {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .error-hint {
+            font-size: 0.875rem;
+            color: #5f6368;
+            margin-bottom: 24px;
+        }
+
+        /* ========== Кнопки ========== */
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #0d62d9;
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #333;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+        }
+
+        /* ========== Карточка советов ========== */
+        .advice-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .advice-card h6 {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .advice-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .advice-card li {
+            padding: 8px 0;
+            color: #5f6368;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .advice-card li i {
+            color: #1a73e8;
+            width: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <h1>Доступ запрещен</h1>
+        <div class="error-message" th:text="${error} ?: 'У вас нет прав для доступа к этой странице'"></div>
+        <div class="error-hint">
+            Для доступа к этой странице требуются права администратора.
+        </div>
+
+        <div class="buttons">
+            <a href="/dashboard" class="btn btn-primary">
+                <i class="fas fa-home"></i> На главную
+            </a>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+
+        <div class="advice-card">
+            <h6><i class="fas fa-lightbulb"></i> Что можно сделать?</h6>
+            <ul>
+                <li><i class="fas fa-user-shield"></i> Обратитесь к администратору системы</li>
+                <li><i class="fas fa-key"></i> Войдите под учетной записью с правами администратора</li>
+                <li><i class="fas fa-arrow-left"></i> Вернитесь на главную страницу</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

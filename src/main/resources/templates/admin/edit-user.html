@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактировать пользователя - Админ-панель РИТМ</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a73e8'><path d='M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z'/></svg>">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* ========== Базовые стили ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f6f8fc;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* ========== Боковая панель ========== */
+        .sidebar {
+            width: 250px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px 0;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: #1a73e8;
+        }
+
+        .admin-panel-subtitle {
+            font-size: 0.875rem;
+            color: #5f6368;
+            margin-top: 5px;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            padding: 0;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #5f6368;
+            padding: 12px 20px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #f1f3f4;
+        }
+
+        .nav-links li.active a {
+            background: #e8f0fe;
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        /* ========== Кнопка выхода ========== */
+        .logout-button {
+            background: none;
+            border: none;
+            color: #5f6368;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            font-family: inherit;
+            font-size: inherit;
+            transition: background 0.3s;
+        }
+
+        .logout-button:hover {
+            background: #f1f3f4;
+        }
+
+        /* ========== Основной контент ========== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px 32px;
+        }
+
+        /* ========== Шапка ========== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-back {
+            background: #f1f3f4;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            transition: background 0.3s;
+        }
+
+        .btn-back:hover {
+            background: #e8eaed;
+        }
+
+        /* ========== Карточки ========== */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-header.bg-info {
+            border-left: 4px solid #1a73e8;
+        }
+
+        .card-header.bg-primary {
+            border-left: 4px solid #1a73e8;
+        }
+
+        .card-header.bg-light {
+            border-left: 4px solid #1a73e8;
+        }
+
+        .card-header h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header i {
+            color: #1a73e8;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* ========== Информация о пользователе ========== */
+        .user-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .info-column {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .info-column p {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #e6f4ea;
+            color: #137333;
+        }
+
+        .status-inactive {
+            background: #fce8e6;
+            color: #c5221f;
+        }
+
+        /* ========== Кнопки ========== */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+            text-decoration: none;
+            font-size: 0.875rem;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0d62d9;
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+        }
+
+        .btn-outline-warning {
+            background: transparent;
+            border: 1px solid #fbbc04;
+            color: #f29900;
+        }
+
+        .btn-outline-warning:hover {
+            background: #fbbc04;
+            color: white;
+        }
+
+        .btn-outline-info {
+            background: transparent;
+            border: 1px solid #1a73e8;
+            color: #1a73e8;
+        }
+
+        .btn-outline-info:hover {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            border: 1px solid #ea4335;
+            color: #ea4335;
+        }
+
+        .btn-outline-danger:hover {
+            background: #ea4335;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        /* ========== Форма ========== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-label .required {
+            color: #ea4335;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+        }
+
+        .form-text {
+            font-size: 0.75rem;
+            color: #5f6368;
+            margin-top: 4px;
+        }
+
+        .input-group {
+            display: flex;
+        }
+
+        .input-group .form-control {
+            border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-group .btn-eye {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-left: none;
+            padding: 0 12px;
+            cursor: pointer;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            color: #5f6368;
+        }
+
+        .invalid-feedback {
+            color: #ea4335;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-check-label {
+            font-size: 0.875rem;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* ========== Генератор паролей ========== */
+        .password-generator {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .password-display {
+            flex: 1;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 10px 12px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+        }
+
+        /* ========== Действия формы ========== */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* ========== Статистика ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-card h6 {
+            font-size: 0.75rem;
+            color: #5f6368;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a73e8;
+        }
+
+        /* ========== Уведомления ========== */
+        .notification {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .notification-success {
+            background: #e6f4ea;
+            color: #137333;
+            border: 1px solid #a8dab5;
+        }
+
+        .notification-error {
+            background: #fce8e6;
+            color: #c5221f;
+            border: 1px solid #f5b4ab;
+        }
+
+        /* ========== Опасная зона ========== */
+        .danger-zone {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .danger-zone h6 {
+            color: #ea4335;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .danger-zone-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ========== Форма карточка ========== */
+        .form-card {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== БОКОВАЯ ПАНЕЛЬ ========== -->
+<div class="sidebar">
+    <div class="logo">
+        <h1><i class="fas fa-shield-alt"></i> РИТМ</h1>
+        <div class="admin-panel-subtitle">
+            <i class="fas fa-user-shield"></i> Админ-панель
+        </div>
+    </div>
+    <ul class="nav-links">
+        <li><a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i><span>Дашборд</span></a></li>
+        <li class="active"><a href="/admin/users"><i class="fas fa-users"></i><span>Пользователи</span></a></li>
+        <li><a href="/admin/users/add"><i class="fas fa-user-plus"></i><span>Добавить</span></a></li>
+        <li><a href="/admin/monitoring"><i class="fas fa-chart-line"></i><span>Мониторинг</span></a></li>
+        <li><a href="/dashboard"><i class="fas fa-envelope"></i><span>Почта</span></a></li>
+        <li style="margin-top: 30px;">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-button">
+                    <i class="fas fa-sign-out-alt"></i><span>Выйти</span>
+                </button>
+            </form>
+        </li>
+    </ul>
+</div>
+
+<!-- ========== ОСНОВНОЙ КОНТЕНТ ========== -->
+<div class="main-content">
+
+    <!-- Шапка -->
+    <div class="header">
+        <h1><i class="fas fa-user-gear" style="color: #1a73e8;"></i> Редактировать пользователя</h1>
+        <a href="/admin/users" class="btn-back"><i class="fas fa-arrow-left"></i> Назад к списку</a>
+    </div>
+
+    <!-- Уведомления -->
+    <div th:if="${success}" class="notification notification-success">
+        <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="notification notification-error">
+        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+    </div>
+
+    <!-- Информация о пользователе -->
+    <div class="card">
+        <div class="card-header bg-info">
+            <h5><i class="fas fa-info-circle"></i> Информация о пользователе</h5>
+        </div>
+        <div class="card-body">
+            <div class="user-info">
+                <div class="info-column">
+                    <p><strong>ID:</strong> <span th:text="${user.id}"></span></p>
+                    <p><strong>Дата регистрации:</strong> <span th:text="${#temporals.format(user.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>
+                </div>
+                <div class="info-column">
+                    <p><strong>Текущий статус:</strong>
+                        <span th:if="${user.enabled}" class="status-badge status-active"><i class="fas fa-check-circle"></i> Активен</span>
+                        <span th:unless="${user.enabled}" class="status-badge status-inactive"><i class="fas fa-times-circle"></i> Отключен</span>
+                    </p>
+                    <p>
+                        <a th:href="@{/admin/users/toggle/{id}(id=${user.id})}" class="btn btn-outline-warning btn-sm"><i class="fas fa-power-off"></i> <span th:text="${user.enabled ? 'Отключить' : 'Включить'}"></span></a>
+                        <a th:href="@{/admin/users/reset-password/{id}(id=${user.id})}" class="btn btn-outline-info btn-sm" style="margin-left: 8px;"><i class="fas fa-key"></i> Сбросить пароль</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Форма редактирования -->
+    <div class="card form-card">
+        <div class="card-header bg-primary">
+            <h5><i class="fas fa-pencil-alt"></i> Редактирование данных</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/users/edit/{id}(id=${user.id})}" method="post" id="userForm">
+                <!-- Имя пользователя -->
+                <div class="form-group">
+                    <label for="username" class="form-label"><i class="fas fa-user-tag"></i> Имя пользователя <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="username" name="username" required minlength="3" maxlength="50" th:value="${user.username}" placeholder="Введите имя пользователя">
+                    <div class="form-text">Имя пользователя для входа в систему. Минимум 3 символа.</div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email" class="form-label"><i class="fas fa-envelope"></i> Email адрес <span class="required">*</span></label>
+                    <input type="email" class="form-control" id="email" name="email" required th:value="${user.email}" placeholder="user@example.com">
+                    <div class="form-text">Email используется для входа и получения писем.</div>
+                </div>
+
+                <!-- Новый пароль (опционально) -->
+                <div class="form-group">
+                    <label for="password" class="form-label"><i class="fas fa-key"></i> Новый пароль <span style="font-weight: normal; color: #5f6368;">(необязательно)</span></label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" minlength="12" placeholder="Оставьте пустым, чтобы не менять">
+                        <button type="button" class="btn-eye" onclick="togglePassword('password')"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="form-text">Заполните только если хотите изменить пароль. Минимум 12 символов.</div>
+                </div>
+
+                <!-- Подтверждение пароля -->
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label"><i class="fas fa-check-double"></i> Подтверждение нового пароля</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="confirmPassword" minlength="12" placeholder="Повторите новый пароль">
+                        <button type="button" class="btn-eye" onclick="togglePassword('confirmPassword')"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="invalid-feedback" id="passwordError">Пароли не совпадают</div>
+                </div>
+
+                <!-- Генератор пароля -->
+                <div class="password-generator">
+                    <button type="button" class="btn btn-secondary" onclick="generatePassword()"><i class="fas fa-random"></i> Сгенерировать пароль</button>
+                    <div class="password-display" id="generatedPassword">Нажмите "Сгенерировать"</div>
+                </div>
+
+                <!-- Статус учётной записи -->
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-toggle-on"></i> Статус учетной записи</label>
+                    <div class="form-check">
+                        <input type="hidden" name="enabled" value="false">
+                        <input class="form-check-input" type="checkbox" id="enabled" name="enabled" value="true" th:checked="${user.enabled}">
+                        <label class="form-check-label" for="enabled">Активная учетная запись</label>
+                    </div>
+                    <div class="form-text">Если снять галочку, пользователь не сможет войти в систему.</div>
+                </div>
+
+                <!-- Зона опасности (удаление) -->
+                <div class="danger-zone">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Опасная зона</h6>
+                    <div class="danger-zone-content">
+                        <p class="form-text" style="margin: 0;">Удаление учетной записи необратимо. Все данные пользователя будут потеряны.</p>
+                        <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Вы уверены, что хотите удалить пользователя ' + document.getElementById('username').value + '? Это действие необратимо.')"><i class="fas fa-trash-alt"></i> Удалить пользователя</a>
+                    </div>
+                </div>
+
+                <!-- Кнопки -->
+                <div class="form-actions">
+                    <a href="/admin/users" class="btn btn-secondary"><i class="fas fa-times-circle"></i> Отмена</a>
+                    <div>
+                        <button type="button" class="btn btn-outline-info" onclick="generatePassword()" style="margin-right: 8px;"><i class="fas fa-random"></i> Сгенерировать пароль</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn"><i class="fas fa-save"></i> Сохранить изменения</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Статистика пользователя -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5><i class="fas fa-chart-bar"></i> Статистика пользователя</h5>
+        </div>
+        <div class="card-body">
+            <div class="stats-grid">
+                <div class="stat-card"><h6>Входящие письма</h6><div class="stat-value">0</div></div>
+                <div class="stat-card"><h6>Отправленные</h6><div class="stat-value">0</div></div>
+                <div class="stat-card"><h6>Непрочитанные</h6><div class="stat-value">0</div></div>
+                <div class="stat-card"><h6>Вложения</h6><div class="stat-value">0</div></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const button = input.nextElementSibling;
+        const icon = button.querySelector('i');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    function generatePassword() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        let password = '';
+
+        password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(Math.floor(Math.random() * 26));
+        password += 'abcdefghijklmnopqrstuvwxyz'.charAt(Math.floor(Math.random() * 26));
+        password += '0123456789'.charAt(Math.floor(Math.random() * 10));
+        password += '!@#$%^&*'.charAt(Math.floor(Math.random() * 8));
+
+        for (let i = 4; i < 12; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        password = password.split('').sort(() => 0.5 - Math.random()).join('');
+
+        document.getElementById('password').value = password;
+        document.getElementById('confirmPassword').value = password;
+        document.getElementById('generatedPassword').textContent = password;
+
+        document.getElementById('password').type = 'text';
+        document.getElementById('confirmPassword').type = 'text';
+
+        document.querySelectorAll('.btn-eye i').forEach(icon => {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        });
+
+        alert('Сгенерирован пароль: ' + password);
+    }
+
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const passwordError = document.getElementById('passwordError');
+
+        if (password.length > 0 || confirmPassword.length > 0) {
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                passwordError.style.display = 'block';
+                document.getElementById('confirmPassword').classList.add('is-invalid');
+                return false;
+            }
+            if (password.length < 12) {
+                e.preventDefault();
+                alert('Пароль должен содержать минимум 12 символов');
+                return false;
+            }
+        }
+        return true;
+    });
+
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        const passwordError = document.getElementById('passwordError');
+
+        if (confirmPassword.length > 0 && password !== confirmPassword) {
+            passwordError.style.display = 'block';
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (confirmPassword.length > 0 && password === confirmPassword) {
+            passwordError.style.display = 'none';
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            passwordError.style.display = 'none';
+            this.classList.remove('is-invalid');
+            this.classList.remove('is-valid');
+        }
+    });
+
+    document.getElementById('username').addEventListener('input', function() {
+        const username = this.value;
+        if (username.length < 3 && username.length > 0) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (username.length >= 3) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-invalid');
+            this.classList.remove('is-valid');
+        }
+    });
+
+    document.getElementById('email').addEventListener('input', function() {
+        const email = this.value;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email.length > 0 && !emailPattern.test(email)) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (emailPattern.test(email)) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-invalid');
+            this.classList.remove('is-valid');
+        }
+    });
+
+    const originalEmail = document.getElementById('email').value;
+    document.getElementById('email').addEventListener('change', function() {
+        if (this.value !== originalEmail) {
+            if (!confirm('Внимание! Изменение email может повлиять на работу пользователя. Продолжить?')) {
+                this.value = originalEmail;
+                this.classList.remove('is-invalid');
+                this.classList.remove('is-valid');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

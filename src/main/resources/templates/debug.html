@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Отладка - РИТМ</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a73e8'><path d='M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z'/></svg>">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f6f8fc; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card h2 { color: #1a73e8; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e0e0e0; }
+        th { background: #f8f9fa; }
+        .badge { background: #e8f0fe; color: #1a73e8; padding: 4px 8px; border-radius: 4px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #1a73e8; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/admin/dashboard" class="back-link">← Назад в админ-панель</a>
+
+    <div class="card">
+        <h2><i class="fas fa-user"></i> Пользователь</h2>
+        <p><strong>Email:</strong> <span th:text="${currentUser}"></span></p>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-envelope"></i> Статистика писем</h2>
+        <p><strong>Входящих:</strong> <span th:text="${inboxCount}"></span></p>
+        <p><strong>Отправленных:</strong> <span th:text="${sentCount}"></span></p>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-inbox"></i> Входящие письма</h2>
+        <table>
+            <tr><th>От</th><th>Тема</th><th>Дата</th></tr>
+            <tr th:each="email : ${inboxEmails}">
+                <td th:text="${email.from}">-</td>
+                <td th:text="${email.subject}">-</td>
+                <td th:text="${email.timeAgo}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-paper-plane"></i> Отправленные письма</h2>
+        <table>
+            <tr><th>Кому</th><th>Тема</th><th>Дата</th></tr>
+            <tr th:each="email : ${sentEmails}">
+                <td th:text="${email.to}">-</td>
+                <td th:text="${email.subject}">-</td>
+                <td th:text="${email.timeAgo}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-project-diagram"></i> Очереди ActiveMQ</h2>
+        <p><strong>Статус:</strong> <span th:text="${queueInfo.status}"></span></p>
+        <p><strong>Всего очередей:</strong> <span th:text="${queueInfo.totalQueues}"></span></p>
+        <p><strong>Сообщений в очередях:</strong> <span th:text="${queueInfo.totalPendingMessages}"></span></p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новое письмо - РИТМ</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a73e8'><path d='M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z'/></svg>">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* ========== Затемнение фона ========== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            z-index: -1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f6f8fc;
+            height: 100vh;
+            background-image: url('/images/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        /* ========== Шапка ========== */
+        .header {
+            background: white;
+            padding: 16px 32px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: #1a73e8;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* ========== Кнопки ========== */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0d62d9;
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+        }
+
+        /* ========== Контейнер формы ========== */
+        .compose-container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .compose-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .compose-form {
+            padding: 0;
+        }
+
+        /* ========== Элементы формы ========== */
+        .form-group {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group:last-of-type {
+            border-bottom: none;
+        }
+
+        .form-label {
+            width: 80px;
+            color: #5f6368;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            padding: 8px 0;
+        }
+
+        .form-input::placeholder {
+            color: #9aa0a6;
+        }
+
+        /* ========== Поле для сообщения ========== */
+        .message-group {
+            align-items: flex-start !important;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .message-label {
+            width: 100%;
+            margin-bottom: 10px;
+            color: #5f6368;
+            font-size: 0.875rem;
+        }
+
+        .message-editor {
+            width: 100%;
+            min-height: 200px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .message-editor:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+
+        /* ========== Загрузка файлов ========== */
+        .file-upload-group {
+            align-items: flex-start !important;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .file-upload-label {
+            width: 100%;
+            margin-bottom: 10px;
+            color: #5f6368;
+            font-size: 0.875rem;
+        }
+
+        .file-input-container {
+            width: 100%;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            font-size: 0.875rem;
+        }
+
+        .file-input:hover {
+            border-color: #1a73e8;
+            background: #f1f3f4;
+        }
+
+        .file-input::file-selector-button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 12px;
+            font-size: 0.875rem;
+        }
+
+        .file-hint {
+            font-size: 0.75rem;
+            color: #5f6368;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* ========== Список файлов ========== */
+        .file-list {
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .file-icon {
+            color: #1a73e8;
+            font-size: 1rem;
+        }
+
+        .file-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .file-size {
+            color: #5f6368;
+            font-size: 0.75rem;
+        }
+
+        .file-remove {
+            color: #ea4335;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .file-remove:hover {
+            background: #fce8e6;
+        }
+
+        .file-total-size {
+            margin-top: 12px;
+            padding: 10px;
+            background: #e8f0fe;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #1a73e8;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .forward-file-item {
+            background: #e8f0fe;
+            border-color: #1a73e8;
+        }
+
+        .forward-badge {
+            color: #1a73e8;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+
+        /* ========== Кнопки формы ========== */
+        .form-actions {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 12px;
+        }
+
+        /* ========== Уведомления ========== */
+        .alert {
+            padding: 12px 20px;
+            margin: 0 20px 20px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .alert-success {
+            background: #e6f4ea;
+            color: #137333;
+            border: 1px solid #a8dab5;
+        }
+
+        .alert-error {
+            background: #fce8e6;
+            color: #c5221f;
+            border: 1px solid #f5b4ab;
+        }
+
+        /* ========== Ссылка назад ========== */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #1a73e8;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .back-link:hover {
+            background: #f1f3f4;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== ШАПКА ========== -->
+<div class="header">
+    <div class="logo">
+        <h1><i class="fas fa-shield-alt"></i> РИТМ</h1>
+    </div>
+    <div class="header-actions">
+        <a href="/dashboard" class="back-link">
+            <i class="fas fa-arrow-left"></i> Назад к почте
+        </a>
+    </div>
+</div>
+
+<!-- ========== УВЕДОМЛЕНИЯ ========== -->
+<div th:if="${success}" class="alert alert-success">
+    <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+</div>
+<div th:if="${error}" class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+</div>
+
+<!-- ========== ФОРМА СОЗДАНИЯ ПИСЬМА ========== -->
+<div class="compose-container">
+    <div class="compose-header">
+        Новое сообщение
+    </div>
+
+    <form th:action="@{/send}" method="post" class="compose-form" enctype="multipart/form-data" id="composeForm">
+        <!-- Поле: Кому -->
+        <div class="form-group">
+            <label class="form-label">Кому:</label>
+            <input type="email" name="to" class="form-input"
+                   placeholder="Введите email получателя" required
+                   th:value="${to}">
+        </div>
+
+        <!-- Поле: Тема -->
+        <div class="form-group">
+            <label class="form-label">Тема:</label>
+            <input type="text" name="subject" class="form-input"
+                   placeholder="Введите тему сообщения" required
+                   th:value="${subject}">
+        </div>
+
+        <!-- Блок для загрузки файлов -->
+        <div class="form-group file-upload-group">
+            <label class="file-upload-label">Прикрепленные файлы:</label>
+            <div class="file-input-container">
+                <input type="file" name="attachments" class="file-input"
+                       multiple accept="*/*" id="fileInput">
+                <div class="file-hint">Выберите один или несколько файлов (размер файлов не ограничен)</div>
+            </div>
+            <div id="fileList" class="file-list"></div>
+        </div>
+
+        <!-- Поле: Текст сообщения -->
+        <div class="form-group message-group">
+            <label class="message-label">Сообщение:</label>
+            <textarea name="message" class="message-editor"
+                      placeholder="Введите текст сообщения" required
+                      th:text="${message}"></textarea>
+        </div>
+
+        <!-- Блок для отображения вложений из пересылаемого письма -->
+        <div th:if="${forwardAttachments != null and not #lists.isEmpty(forwardAttachments)}"
+             class="form-group file-upload-group">
+            <label class="file-upload-label">Файлы из пересылаемого письма:</label>
+            <div class="file-list">
+                <div th:each="att : ${forwardAttachments}" class="file-item forward-file-item">
+                    <div class="file-info">
+                        <i class="fas fa-file file-icon"></i>
+                        <div class="file-details">
+                            <div class="file-name">
+                                <span th:text="${att.fileName}"></span>
+                                <span class="forward-badge"><i class="fas fa-share"></i> из пересылаемого письма</span>
+                            </div>
+                            <div class="file-size" th:text="${att.formattedSize}"></div>
+                        </div>
+                    </div>
+                    <span style="color: #34a853; font-size: 0.75rem;"><i class="fas fa-check"></i> будет прикреплён</span>
+                    <!-- Скрытый input для передачи ID файла -->
+                    <input type="hidden" name="forwardAttachmentIds" th:value="${att.id}">
+                </div>
+            </div>
+            <div class="file-hint">Эти файлы будут прикреплены к письму</div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                <i class="fas fa-paper-plane"></i> Отправить
+            </button>
+            <a href="/dashboard" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Отменить
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Хранилище выбранных файлов (только новые, пересылаемые отдельно)
+    let selectedFiles = [];
+
+    /**
+     * Обновляет список НОВЫХ файлов в интерфейсе.
+     */
+    function updateNewFilesList() {
+        // Находим или создаём контейнер для новых файлов
+        let newFilesContainer = document.getElementById('newFilesContainer');
+        if (!newFilesContainer) {
+            newFilesContainer = document.createElement('div');
+            newFilesContainer.id = 'newFilesContainer';
+            newFilesContainer.style.marginTop = '15px';
+            const fileListDiv = document.getElementById('fileList');
+            if (fileListDiv) {
+                fileListDiv.appendChild(newFilesContainer);
+            }
+        }
+        newFilesContainer.innerHTML = '';
+
+        if (selectedFiles.length > 0) {
+            let totalSize = 0;
+
+            selectedFiles.forEach((file, index) => {
+                totalSize += file.size;
+
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <i class="fas fa-file file-icon"></i>
+                        <div class="file-details">
+                            <div class="file-name">${escapeHtml(file.name)}</div>
+                            <div class="file-size">${formatFileSize(file.size)}</div>
+                        </div>
+                    </div>
+                    <button type="button" class="file-remove" onclick="removeNewFile(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                newFilesContainer.appendChild(fileItem);
+            });
+
+            const totalSizeElement = document.createElement('div');
+            totalSizeElement.className = 'file-total-size';
+            totalSizeElement.innerHTML = `<strong>Общий размер новых файлов:</strong> ${formatFileSize(totalSize)}`;
+            newFilesContainer.appendChild(totalSizeElement);
+        }
+    }
+
+    /**
+     * Обработчик выбора файлов - ДОБАВЛЯЕТ к уже выбранным
+     */
+    function onFileSelect(event) {
+        const newFiles = Array.from(event.target.files);
+
+        if (newFiles.length > 0) {
+            // Добавляем новые файлы к существующим
+            selectedFiles = [...selectedFiles, ...newFiles];
+
+            // Очищаем input, чтобы можно было выбрать снова
+            event.target.value = '';
+
+            // Обновляем отображение
+            updateNewFilesList();
+        }
+    }
+
+    /**
+     * Удаляет новый файл из списка
+     */
+    function removeNewFile(index) {
+        selectedFiles.splice(index, 1);
+        updateNewFilesList();
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Назначаем обработчик на input file
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) {
+        fileInput.addEventListener('change', onFileSelect);
+    }
+
+    // Перед отправкой формы добавляем все новые файлы в input
+    const composeForm = document.getElementById('composeForm');
+    if (composeForm) {
+        composeForm.addEventListener('submit', function(e) {
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => {
+                dt.items.add(file);
+            });
+            if (fileInput) {
+                fileInput.files = dt.files;
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

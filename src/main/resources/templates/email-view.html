@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Письмо - РИТМ</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a73e8'><path d='M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z'/></svg>">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* ========== Базовые стили ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f6f8fc;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* ========== Боковая панель ========== */
+        .sidebar {
+            width: 250px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px 0;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: #1a73e8;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            padding: 0;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #5f6368;
+            padding: 12px 20px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #f1f3f4;
+        }
+
+        .nav-links li.active a {
+            background: #e8f0fe;
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        /* ========== Кнопка выхода ========== */
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #5f6368;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #f1f3f4;
+        }
+
+        /* ========== Основной контент ========== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        /* ========== Шапка ========== */
+        .header {
+            background: white;
+            padding: 16px 32px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .search-bar input:focus {
+            border-color: #1a73e8;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .compose-btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+            font-size: 0.875rem;
+        }
+
+        .compose-btn:hover {
+            background: #0d62d9;
+        }
+
+        .change-password-link {
+            color: #5f6368;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.875rem;
+            transition: background 0.3s;
+        }
+
+        .change-password-link:hover {
+            background: #f1f3f4;
+        }
+
+        /* ========== Контейнер письма ========== */
+        .email-container {
+            background: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== Шапка письма ========== */
+        .email-header {
+            padding: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .email-subject {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* ========== Кнопки действий ========== */
+        .action-buttons {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            transition: background 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #0d62d9;
+        }
+
+        /* ========== Мета информация ========== */
+        .email-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #5f6368;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .email-from, .email-to {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .email-date {
+            font-size: 0.875rem;
+            color: #5f6368;
+        }
+
+        /* ========== Тело письма ========== */
+        .email-body {
+            padding: 30px;
+            line-height: 1.6;
+            font-size: 1rem;
+            color: #333;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 60vh;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* ========== Вложения ========== */
+        .email-attachments {
+            border-top: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .attachments-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .attachments-header h3 {
+            font-size: 1rem;
+            color: #5f6368;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .attachments-content {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .attachments-list {
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: box-shadow 0.3s;
+        }
+
+        .attachment-item:hover {
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .attachment-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .file-icon {
+            color: #1a73e8;
+            font-size: 1.25rem;
+        }
+
+        .attachment-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .attachment-size {
+            font-size: 0.75rem;
+            color: #5f6368;
+            margin-left: 8px;
+        }
+
+        .download-btn {
+            background: #1a73e8;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #0d62d9;
+        }
+
+        /* ========== Уведомления ========== */
+        .notification {
+            margin: 0 20px 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .notification-success {
+            background: #e6f4ea;
+            color: #137333;
+            border: 1px solid #a8dab5;
+        }
+
+        .notification-error {
+            background: #fce8e6;
+            color: #c5221f;
+            border: 1px solid #f5b4ab;
+        }
+
+        /* ========== Ссылка назад ========== */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #1a73e8;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .back-link:hover {
+            background: #f1f3f4;
+        }
+
+        /* ========== Стилизация скроллбара ========== */
+        .attachments-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .attachments-content::-webkit-scrollbar-track {
+            background: #f1f3f4;
+            border-radius: 3px;
+        }
+
+        .attachments-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+    </style>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var email = /*[[${email}]]*/ null;
+        var emailFrom = /*[[${email != null ? email.from : ''}]]*/ '';
+        var emailTo = /*[[${email != null ? email.to : ''}]]*/ '';
+        var emailSubject = /*[[${email != null ? email.subject : ''}]]*/ '';
+        var emailContent = /*[[${email != null ? email.content : ''}]]*/ '';
+        var emailTimeAgo = /*[[${email != null ? email.timeAgo : ''}]]*/ '';
+
+        console.log("Email loaded:", email);
+        console.log("From:", emailFrom);
+        console.log("Subject:", emailSubject);
+
+        /**
+         * Ответ на письмо (Re:)
+         */
+        function replyEmail() {
+            var subject = 'Re: ' + emailSubject;
+            var to = emailFrom;
+            window.location.href = '/compose?to=' + encodeURIComponent(to) +
+                                   '&subject=' + encodeURIComponent(subject);
+        }
+
+        /**
+         * Пересылка письма (Fwd:)
+         */
+        function forwardEmail() {
+            console.log("=== FORWARD EMAIL CALLED ===");
+            console.log("Email object:", email);
+            console.log("Email ID:", email ? email.id : "email is null");
+
+            if (!email || !email.id) {
+                console.error("Cannot forward: email or email.id is null");
+                alert("Ошибка: письмо не загружено. Попробуйте обновить страницу.");
+                return;
+            }
+
+            var emailId = email.id;
+            var subject = 'Fwd: ' + emailSubject;
+            var body = '\n\n\n-------- Пересланное сообщение --------\n' +
+               'От: ' + emailFrom + '\n' +
+               'Кому: ' + emailTo + '\n' +
+               'Тема: ' + emailSubject + '\n' +
+               'Дата: ' + emailTimeAgo + '\n\n' +
+               (emailContent || '');
+
+            console.log("Forwarding to URL: /compose?forwardId=" + emailId);
+
+            window.location.href = '/compose?subject=' + encodeURIComponent(subject) +
+                           '&message=' + encodeURIComponent(body) +
+                           '&forwardId=' + encodeURIComponent(emailId);
+        }
+    </script>
+</head>
+<body>
+
+<!-- ========== БОКОВАЯ ПАНЕЛЬ ========== -->
+<div class="sidebar">
+    <div class="logo">
+        <h1><i class="fas fa-shield-alt"></i> РИТМ</h1>
+    </div>
+    <ul class="nav-links">
+        <li th:classappend="${currentFolder == 'inbox'} ? 'active' : ''">
+            <a href="/dashboard?folder=inbox">
+                <i class="fas fa-inbox"></i>
+                <span>Входящие</span>
+            </a>
+        </li>
+        <li th:classappend="${currentFolder == 'sent'} ? 'active' : ''">
+            <a href="/dashboard?folder=sent">
+                <i class="fas fa-paper-plane"></i>
+                <span>Отправленные</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a href="/admin/dashboard">
+                <i class="fas fa-user-shield"></i>
+                <span>Админ-панель</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- ========== ОСНОВНОЙ КОНТЕНТ ========== -->
+<div class="main-content">
+
+    <!-- ========== ШАПКА ========== -->
+    <div class="header">
+        <div class="search-bar">
+            <form action="/dashboard" method="get">
+                <input type="hidden" name="folder" th:value="${currentFolder}">
+                <input type="text" name="search" placeholder="Поиск в системе" th:value="${searchQuery}">
+            </form>
+        </div>
+        <div class="user-info">
+            <button class="compose-btn" onclick="location.href='/compose'">
+                <i class="fas fa-edit"></i> Написать
+            </button>
+            <a href="/change-password" class="change-password-link">
+                <i class="fas fa-key"></i> Сменить пароль
+            </a>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== УВЕДОМЛЕНИЯ ========== -->
+    <div th:if="${success}" class="notification notification-success">
+        <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="notification notification-error">
+        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+    </div>
+
+    <!-- ========== ПИСЬМО ========== -->
+    <div class="email-container" th:if="${email}">
+        <div class="email-header">
+            <div class="email-subject" th:text="${email.subject}">Тема письма</div>
+
+            <!-- Кнопки действий -->
+            <div class="action-buttons">
+                <button onclick="replyEmail()" class="action-btn">
+                    <i class="fas fa-reply"></i> Ответить
+                </button>
+                <button onclick="forwardEmail()" class="action-btn">
+                    <i class="fas fa-share"></i> Переслать
+                </button>
+            </div>
+
+            <!-- Мета информация -->
+            <div class="email-meta">
+                <div class="email-from">
+                    <strong>От:</strong> <span th:text="${email.from}">отправитель</span>
+                </div>
+                <div class="email-to">
+                    <strong>Кому:</strong> <span th:text="${email.to}">получатель</span>
+                </div>
+                <div class="email-date" th:text="${email.timeAgo}">дата</div>
+            </div>
+        </div>
+
+        <!-- Тело письма -->
+        <div class="email-body" th:text="${email.content}">
+            Текст письма
+        </div>
+
+        <!-- Вложения -->
+        <div class="email-attachments" th:if="${email.hasAttachments()}">
+            <div class="attachments-header">
+                <h3><i class="fas fa-paperclip"></i> Вложения (<span th:text="${email.attachmentCount}"></span>)</h3>
+            </div>
+            <div class="attachments-content">
+                <div class="attachments-list">
+                    <div th:each="attachment : ${email.attachments}" class="attachment-item">
+                        <div class="attachment-info">
+                            <i class="fas fa-file file-icon"></i>
+                            <div class="attachment-details">
+                                <span class="attachment-name" th:text="${attachment.fileName}"></span>
+                                <span class="attachment-size" th:text="${attachment.formattedSize}"></span>
+                            </div>
+                        </div>
+                        <a th:href="@{/download/{id}(id=${attachment.id})}" class="download-btn" download>
+                            <i class="fas fa-download"></i> Скачать
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Нет вложений -->
+        <div class="email-attachments" th:unless="${email.hasAttachments()}">
+            <div class="attachments-header">
+                <h3><i class="fas fa-paperclip"></i> Вложения</h3>
+            </div>
+            <div class="attachments-list" style="text-align: center; color: #5f6368; padding: 20px;">
+                <i class="fas fa-paperclip"></i> Вложений нет
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== ПИСЬМО НЕ НАЙДЕНО ========== -->
+    <div class="email-container" th:if="${email == null}">
+        <div class="email-header">
+            <div class="email-subject">Письмо не найдено</div>
+        </div>
+        <div class="email-body">
+            <p>Запрошенное письмо не существует или у вас нет к нему доступа.</p>
+            <a href="/dashboard" class="back-link">
+                <i class="fas fa-arrow-left"></i> Вернуться к почте
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    console.log("Email object:", /*[[${email}]]*/ null);
+    console.log("Email from:", /*[[${email.from}]]*/ '');
+    console.log("Email subject:", /*[[${email.subject}]]*/ '');
+</script>
+
+</body>
+</html>

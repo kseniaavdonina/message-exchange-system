@@ -1,0 +1,76 @@
+# ============================================================================
+# .gitignore для проекта РИТМ (Secure Message System)
+# ============================================================================
+
+# ========== ЛОГИ ==========
+*.log
+logs/
+apk.log
+scaler.log
+application.log
+
+# ========== БЭКАПЫ ==========
+backups/
+
+# ========== ВРЕМЕННЫЕ ФАЙЛЫ ==========
+cookies_*.txt
+*.tmp
+*.temp
+
+# ========== СИСТЕМНЫЕ ФАЙЛЫ ==========
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========== IDE ==========
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.settings/
+.classpath
+.project
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# NetBeans
+nb-configuration.xml
+
+# ========== DOCKER ==========
+*.pid
+docker-compose.override.yml
+
+# ========== MAVEN / BUILD ==========
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+# ========== ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ (с паролями) ==========
+.env
+.env.local
+.env.production
+application-prod.properties
+application-production.properties
+
+# ========== ЗАВИСИМОСТИ ==========
+node_modules/
+
+# ========== ОТЧЁТЫ О ТЕСТАХ ==========
+test-output/
+surefire-reports/
+
+# ========== РЕЗУЛЬТАТЫ ГЕНЕРАЦИИ JAVADOC ==========
+javadoc/
+apidocs/
+
+# Бэкапы и дампы
+backups/
+schema.sql
+*.sql

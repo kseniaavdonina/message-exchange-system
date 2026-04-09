@@ -1,0 +1,220 @@
+# ============================================================================
+# docker-compose.yml - Контейнеризация системы обмена сообщениями РИТМ
+# ============================================================================
+# Компоненты:
+#   - postgres   : база данных
+#   - minio      : S3-совместимое хранилище для файлов
+#   - activemq   : брокер сообщений для асинхронной доставки
+#   - redis      : кэш и хранение сессий
+#   - nginx      : балансировщик нагрузки
+#   - app-1      : основной экземпляр приложения (всегда запущен)
+#   - scaler     : автоматическое масштабирование (создаёт app-2, app-3, ...)
+# ============================================================================
+
+services:
+  # ============ POSTGRESQL ============
+  postgres:
+    image: postgres:16-alpine
+    container_name: securemsg-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: securemsg_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - securemsg-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # ============ MINIO (S3-хранилище) ============
+  minio:
+    image: minio/minio:latest
+    container_name: securemsg-minio
+    restart: always
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # Web-консоль
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - securemsg-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # ============ ACTIVEMQ (Очереди сообщений) ============
+  activemq:
+    image: rmohr/activemq:5.15.9
+    container_name: securemsg-activemq
+    restart: always
+    ports:
+      - "61616:61616"   # JMS
+      - "8161:8161"     # Web-консоль
+    environment:
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD: admin
+      ACTIVEMQ_OPTS: "-Xmx128m -Xms64m -XX:MaxMetaspaceSize=64m"
+    volumes:
+      - activemq_data:/data/activemq
+    networks:
+      - securemsg-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # ============ REDIS (Кэш и сессии) ============
+  redis:
+    image: redis:alpine
+    container_name: securemsg-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - securemsg-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # ============ NGINX (Балансировщик) ============
+  nginx:
+    image: nginx:alpine
+    container_name: securemsg-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app-1
+    networks:
+      - securemsg-network
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 32M
+
+  # ============ APP-1 (ОСНОВНОЙ ЭКЗЕМПЛЯР) ============
+  # Всегда запущен. Скейлер создаёт дополнительные экземпляры (app-2, app-3...)
+  app-1:
+    build: .
+    container_name: securemsg-app-1
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      activemq:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/securemsg_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      MINIO_BUCKET: securemsg-attachments
+      SPRING_ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      SPRING_ACTIVEMQ_USER: admin
+      SPRING_ACTIVEMQ_PASSWORD: admin
+      SPRING_PROFILES_ACTIVE: docker
+      INSTANCE_ID: 1
+      INSTANCE_NAME: app-1
+      JAVA_OPTS: "-Xmx512m -Xms256m -XX:+UseG1GC -XX:MaxMetaspaceSize=128m"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - securemsg-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # ============ APP-2, APP-3... (СОЗДАЮТСЯ СКЕЙЛЕРОМ) ============
+  # app-2, app-3 и т.д. создаются динамически скриптом scale.ps1
+  # Не запускаются при старте docker-compose up
+
+  # ============ АВТОМАСШТАБИРОВАНИЕ (SCALER) ============
+  scaler:
+    image: alpine:latest
+    container_name: securemsg-scaler
+    restart: always
+    depends_on:
+      - nginx
+      - postgres
+      - redis
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./scale.ps1:/scale.ps1
+      - ./logs/scaler:/var/log
+    command: |
+      sh -c "
+      echo '📦 Установка компонентов...' &&
+      apk add --no-cache docker-cli powershell curl &&
+      echo '🕐 Настройка cron (каждую минуту)...' &&
+      echo '* * * * * cd / && pwsh -File /scale.ps1 >> /var/log/scaler.log 2>&1' | crontab - &&
+      echo '✅ Scaler запущен!' &&
+      crond -f -l 2
+      "
+    network_mode: host
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 32M
+
+networks:
+  securemsg-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
+  activemq_data:
+  redis_data:
