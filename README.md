@@ -67,29 +67,24 @@
 
 ### Шаг 1: Клонирование репозитория
 
-```bash
 git clone https://github.com/your-username/message-exchange-system.git
 cd message-exchange-system
 
 ### Шаг 2: Сборка приложения
 
-```bash
 mvn clean
 mvn package
 
 ### Шаг 3: Запуск всех сервисов
 
-```bash
 docker-compose up -d
 
 ### Шаг 4: Проверка статуса контейнеров
 
-```bash
 docker-compose ps
 
 ### Шаг 5: Просмотр логов (при необходимости)
 
-```bash
 docker-compose logs -f app-1
 
 ### Шаг 6: Доступ к системе
