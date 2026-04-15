@@ -28,7 +28,7 @@ public class SessionManager {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
-    private static final int MAX_USERS_PER_CONTAINER = 10;
+    private static final int MAX_USERS_PER_CONTAINER = 100;
     private static final String CONTAINERS_KEY = "active_containers";
     private static final String USER_CONTAINER_PREFIX = "user:";
     private static final String CONTAINER_USERS_PREFIX = "container:";
