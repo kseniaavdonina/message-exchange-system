@@ -4,7 +4,7 @@
 # Описание:
 #   - Слушает Redis-канал scale-channel для команд CREATE
 #   - Мониторит загрузку контейнеров через API
-#   - Автоматически создаёт новые контейнеры при достижении лимита (10 пользователей)
+#   - Автоматически создаёт новые контейнеры при достижении лимита (100 пользователей)
 #   - Удаляет пустые контейнеры (кроме app-1)
 #   - Очищает "фантомные" контейнеры в Redis
 #
@@ -68,7 +68,7 @@ try {
     Write-Host "[INFO] Current load (from Redis):" -ForegroundColor Yellow
     $totalUsers = 0
     $stats.PSObject.Properties | Sort-Object Name | ForEach-Object {
-        Write-Host "   $($_.Name): $($_.Value)/10 users"
+        Write-Host "   $($_.Name): $($_.Value)/100 users"
         $totalUsers += [int]$_.Value
     }
 
@@ -106,7 +106,7 @@ try {
     # ========== ПРОВЕРКА НАЛИЧИЯ СВОБОДНЫХ МЕСТ ==========
     $freeContainerExists = $false
     $stats.PSObject.Properties | ForEach-Object {
-        if ([int]$_.Value -lt 10 -and $realContainers -contains "securemsg-$($_.Name)") {
+        if ([int]$_.Value -lt 100 -and $realContainers -contains "securemsg-$($_.Name)") {
             $freeContainerExists = $true
         }
     }
