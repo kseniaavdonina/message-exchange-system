@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Новое письмо - РИТМ</title>
+    <title>Новое сообщение - РИТМ</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a73e8'><path d='M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z'/></svg>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -374,7 +374,7 @@
     <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
 </div>
 
-<!-- ========== ФОРМА СОЗДАНИЯ ПИСЬМА ========== -->
+<!-- ========== ФОРМА СОЗДАНИЯ СООБЩЕНИЯ ========== -->
 <div class="compose-container">
     <div class="compose-header">
         Новое сообщение
@@ -416,10 +416,10 @@
                       th:text="${message}"></textarea>
         </div>
 
-        <!-- Блок для отображения вложений из пересылаемого письма -->
+        <!-- Блок для отображения вложений из пересылаемого сообщения -->
         <div th:if="${forwardAttachments != null and not #lists.isEmpty(forwardAttachments)}"
              class="form-group file-upload-group">
-            <label class="file-upload-label">Файлы из пересылаемого письма:</label>
+            <label class="file-upload-label">Файлы из пересылаемого сообщения:</label>
             <div class="file-list">
                 <div th:each="att : ${forwardAttachments}" class="file-item forward-file-item">
                     <div class="file-info">
@@ -427,7 +427,7 @@
                         <div class="file-details">
                             <div class="file-name">
                                 <span th:text="${att.fileName}"></span>
-                                <span class="forward-badge"><i class="fas fa-share"></i> из пересылаемого письма</span>
+                                <span class="forward-badge"><i class="fas fa-share"></i> из пересылаемого сообщения</span>
                             </div>
                             <div class="file-size" th:text="${att.formattedSize}"></div>
                         </div>
@@ -437,7 +437,7 @@
                     <input type="hidden" name="forwardAttachmentIds" th:value="${att.id}">
                 </div>
             </div>
-            <div class="file-hint">Эти файлы будут прикреплены к письму</div>
+            <div class="file-hint">Эти файлы будут прикреплены к сообщению</div>
         </div>
 
         <!-- Кнопки действий -->
